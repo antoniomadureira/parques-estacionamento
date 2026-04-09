@@ -19,67 +19,68 @@ const PainelCGIU = () => {
   if (loading) return (
     <div style={styles.loadingContainer}>
       <div style={styles.spinner}></div>
-      <p>Sincronizando infraestrutura...</p>
+      <p style={{ color: '#888', marginTop: '10px' }}>Sincronizando CGIU...</p>
     </div>
   );
 
   return (
     <div style={styles.appContainer}>
-      {/* Header Estilo CGIU */}
+      {/* Header com estilo idêntico ao Meteo */}
       <header style={styles.header}>
-        <div style={styles.headerBrand}>
-          <div style={styles.logoCircle}></div>
-          <div>
-            <h1 style={styles.mainTitle}>Centro de Gestão e Inteligência Urbana</h1>
-            <p style={styles.subTitle}>Monitorização de Estacionamento — Matosinhos</p>
-          </div>
+        <div style={styles.headerInfo}>
+          <h1 style={styles.headerTitle}>Centro de Gestão e Inteligência Urbana</h1>
+          <p style={styles.headerSubtitle}>Monitorização de Estacionamento — Matosinhos</p>
         </div>
-        <div style={styles.statusBadge}>
-          <span style={styles.pulseDot}></span> SISTEMA OPERACIONAL
+        <div style={styles.refreshControl}>
+          <div style={styles.pulse}></div>
+          <span style={styles.updateText}>LIVE</span>
         </div>
       </header>
 
-      {/* Grid de Cartões */}
-      <main style={styles.dashboardGrid}>
+      {/* Grid Principal */}
+      <main style={styles.grid}>
         {parques.map((parque, idx) => {
           const ocupacao = parseFloat(parque.ocupacaoPercentagem);
-          // Cor baseada no estado (Verde, Amarelo, Vermelho)
-          const statusColor = ocupacao > 90 ? '#ff4d4f' : ocupacao > 70 ? '#faad14' : '#00f2ff';
+          // Cores de acento baseadas no projeto Meteo
+          const accentColor = ocupacao > 90 ? '#ff4d4f' : ocupacao > 70 ? '#faad14' : '#00d2ff';
 
           return (
-            <section key={idx} style={styles.card}>
+            <div key={idx} style={styles.card}>
               <div style={styles.cardHeader}>
-                <span style={styles.iconTag}>P</span>
-                <h2 style={styles.parkTitle}>{parque.identificadorLocal}</h2>
+                <div style={{...styles.iconBox, color: accentColor}}>P</div>
+                <h2 style={styles.parkName}>{parque.identificadorLocal}</h2>
               </div>
 
-              <div style={styles.dataRow}>
-                <div style={styles.mainValueContainer}>
-                  <span style={{ ...styles.bigNumber, color: statusColor }}>
+              <div style={styles.cardBody}>
+                <div style={styles.mainInfo}>
+                  <h3 style={{...styles.bigNumber, color: accentColor}}>
                     {parque.lugaresLivres}
-                  </span>
-                  <span style={styles.unitLabel}>LIVRES</span>
+                  </h3>
+                  <p style={styles.label}>LIVRES</p>
                 </div>
-                
-                <div style={styles.percentageContainer}>
-                  <span style={styles.percValue}>{ocupacao}%</span>
-                  <span style={styles.percLabel}>OCUPAÇÃO</span>
+
+                <div style={styles.secondaryInfo}>
+                  <div style={styles.infoBlock}>
+                    <span style={styles.infoValue}>{ocupacao}%</span>
+                    <span style={styles.infoLabel}>OCUPAÇÃO</span>
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <span style={styles.infoValue}>{parque.capacidadeTotal}</span>
+                    <span style={styles.infoLabel}>TOTAL</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Barra de Progresso Visual */}
-              <div style={styles.progressBg}>
+              {/* Barra de Progresso Estilo Meteo */}
+              <div style={styles.progressBarBg}>
                 <div style={{ 
-                  ...styles.progressFill, 
+                  ...styles.progressBarFill, 
                   width: `${ocupacao}%`, 
-                  backgroundColor: statusColor 
+                  backgroundColor: accentColor,
+                  boxShadow: `0 0 10px ${accentColor}44` 
                 }}></div>
               </div>
-
-              <footer style={styles.cardFooter}>
-                Capacidade: {parque.capacidadeTotal} lugares
-              </footer>
-            </section>
+            </div>
           );
         })}
       </main>
@@ -87,63 +88,63 @@ const PainelCGIU = () => {
   );
 };
 
+// CSS Injetado com base no projeto antoniomadureira.github.io/meteo/
 const styles = {
   appContainer: {
     minHeight: '100vh',
-    backgroundColor: '#0a0e14', // Fundo ultra-dark do anexo
-    color: '#e6e6e6',
-    padding: '30px',
-    fontFamily: "'Inter', -apple-system, sans-serif",
+    backgroundColor: '#0c1117', // Cor de fundo do projeto Meteo
+    color: '#f0f6fc',
+    padding: '40px 20px',
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   header: {
+    maxWidth: '1200px',
+    margin: '0 auto 40px auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '40px',
-    borderBottom: '1px solid #1f262e',
-    paddingBottom: '20px',
   },
-  headerBrand: { display: 'flex', alignItems: 'center', gap: '15px' },
-  logoCircle: { width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #00f2ff', background: 'radial-gradient(circle, #00f2ff 0%, transparent 70%)' },
-  mainTitle: { margin: 0, fontSize: '18px', fontWeight: '600', letterSpacing: '0.5px', color: '#fff' },
-  subTitle: { margin: 0, fontSize: '12px', color: '#718096', fontWeight: '400' },
-  statusBadge: { backgroundColor: '#141a23', padding: '6px 12px', borderRadius: '20px', fontSize: '10px', color: '#00f2ff', border: '1px solid #1f262e', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700' },
-  pulseDot: { width: '6px', height: '6px', backgroundColor: '#00f2ff', borderRadius: '50%', animation: 'pulse 2s infinite' },
-  
-  dashboardGrid: {
+  headerTitle: { fontSize: '24px', fontWeight: '600', margin: 0, color: '#fff' },
+  headerSubtitle: { fontSize: '14px', color: '#8b949e', margin: '4px 0 0 0' },
+  refreshControl: { display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#161b22', padding: '8px 16px', borderRadius: '20px', border: '1px solid #30363d' },
+  pulse: { width: '8px', height: '8px', backgroundColor: '#00d2ff', borderRadius: '50%', boxShadow: '0 0 8px #00d2ff' },
+  updateText: { fontSize: '12px', fontWeight: 'bold', color: '#00d2ff' },
+
+  grid: {
+    maxWidth: '1200px',
+    margin: '0 auto',
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '20px',
   },
   card: {
-    backgroundColor: '#141a23', // Cor dos cards do anexo
-    borderRadius: '8px',
+    backgroundColor: '#161b22', // Cartões do Meteo
+    borderRadius: '12px',
     padding: '24px',
-    border: '1px solid #1f262e',
+    border: '1px solid #30363d',
+    transition: 'transform 0.2s ease, border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
-    transition: 'transform 0.2s ease',
+    justifyContent: 'space-between',
   },
-  cardHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' },
-  iconTag: { backgroundColor: '#0a0e14', color: '#00f2ff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', border: '1px solid #1f262e' },
-  parkTitle: { margin: 0, fontSize: '14px', color: '#a0aec0', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' },
-  
-  dataRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '15px' },
-  mainValueContainer: { display: 'flex', flexDirection: 'column' },
-  bigNumber: { fontSize: '48px', fontWeight: '700', lineHeight: '1' },
-  unitLabel: { fontSize: '10px', color: '#4a5568', fontWeight: '700', marginTop: '5px' },
-  
-  percentageContainer: { textAlign: 'right', display: 'flex', flexDirection: 'column' },
-  percValue: { fontSize: '20px', fontWeight: '600', color: '#fff' },
-  percLabel: { fontSize: '10px', color: '#4a5568', fontWeight: '700' },
-  
-  progressBg: { width: '100%', height: '4px', backgroundColor: '#0a0e14', borderRadius: '2px', overflow: 'hidden', marginBottom: '15px' },
-  progressFill: { height: '100%', transition: 'width 1s ease-in-out' },
-  
-  cardFooter: { fontSize: '11px', color: '#4a5568', borderTop: '1px solid #1f262e', paddingTop: '12px' },
-  
-  loadingContainer: { minHeight: '100vh', backgroundColor: '#0a0e14', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#00f2ff' },
-  spinner: { width: '40px', height: '40px', border: '3px solid #141a23', borderTop: '3px solid #00f2ff', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '15px' }
+  cardHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' },
+  iconBox: { width: '32px', height: '32px', backgroundColor: '#0c1117', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', border: '1px solid #30363d' },
+  parkName: { fontSize: '14px', fontWeight: '500', color: '#8b949e', textTransform: 'uppercase', margin: 0, letterSpacing: '0.5px' },
+
+  cardBody: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
+  bigNumber: { fontSize: '56px', fontWeight: '700', margin: 0, lineHeight: '1' },
+  label: { fontSize: '11px', fontWeight: 'bold', color: '#484f58', marginTop: '4px' },
+
+  secondaryInfo: { display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'right' },
+  infoBlock: { display: 'flex', flexDirection: 'column' },
+  infoValue: { fontSize: '18px', fontWeight: '600', color: '#fff' },
+  infoLabel: { fontSize: '9px', fontWeight: 'bold', color: '#484f58' },
+
+  progressBarBg: { width: '100%', height: '6px', backgroundColor: '#0d1117', borderRadius: '3px', overflow: 'hidden' },
+  progressBarFill: { height: '100%', transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)' },
+
+  loadingContainer: { minHeight: '100vh', backgroundColor: '#0c1117', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
+  spinner: { width: '30px', height: '30px', border: '3px solid #161b22', borderTop: '3px solid #00d2ff', borderRadius: '50%', animation: 'spin 1s linear infinite' }
 };
 
 export default PainelCGIU;

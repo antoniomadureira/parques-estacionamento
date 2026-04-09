@@ -9,7 +9,12 @@ const PainelCGIU = () => {
     const loadData = async () => {
       try {
         const data = await fetchParkingData();
-        setParques(data.filter(p => p && p.identificadorLocal));
+        // Filtra os válidos e ordena alfabeticamente (ex: P1 primeiro, P2 depois)
+        setParques(
+          data
+            .filter(p => p && p.identificadorLocal)
+            .sort((a, b) => a.identificadorLocal.localeCompare(b.identificadorLocal))
+        );
       } catch (error) {
         console.error("[CGIU Dashboard] Erro ao carregar dados da API:", error);
       } finally {
@@ -27,22 +32,18 @@ const PainelCGIU = () => {
     const nomeParque = parque.identificadorLocal ? parque.identificadorLocal.toUpperCase() : '';
     const baseUrl = 'https://www.google.com/maps/search/?api=1&query=';
 
-    // Override para P1: Aponta para a morada exata do parque SABA na Rua de Tomaz Ribeiro
     if (nomeParque.includes('P1') || nomeParque.includes('MARISQUEIRAS')) {
       return `${baseUrl}${encodeURIComponent("Parque estacionamento SABA Rua de Tomaz Ribeiro Matosinhos")}`;
     }
     
-    // Override para P2: Mantém a query que validou estar a funcionar perfeitamente
     if (nomeParque.includes('P2') || nomeParque.includes('MERCADO')) {
       return `${baseUrl}${encodeURIComponent("Mercado P2 Matosinhos")}`;
     }
 
-    // Fallback normal usando coordenadas se existirem
     if (parque.latitude && parque.longitude) {
       return `${baseUrl}${parque.latitude},${parque.longitude}`;
     }
 
-    // Último recurso: pesquisa pelo nome recebido da API
     return `${baseUrl}${encodeURIComponent(`${parque.identificadorLocal} Matosinhos Portugal`)}`;
   };
 
@@ -63,15 +64,15 @@ const PainelCGIU = () => {
         <div style={styles.legendContainer}>
           <div style={styles.legendItem}>
             <span style={{...styles.legendDot, backgroundColor: '#52c41a'}}></span>
-            <span style={styles.legendText}>Livre</span>
+            <span style={styles.legendText}>Livre (0-70%)</span>
           </div>
           <div style={styles.legendItem}>
             <span style={{...styles.legendDot, backgroundColor: '#faad14'}}></span>
-            <span style={styles.legendText}>Condicionado</span>
+            <span style={styles.legendText}>Condicionado (71-90%)</span>
           </div>
           <div style={styles.legendItem}>
             <span style={{...styles.legendDot, backgroundColor: '#ff4d4f'}}></span>
-            <span style={styles.legendText}>Crítico</span>
+            <span style={styles.legendText}>Crítico (>90%)</span>
           </div>
           
           <div style={styles.liveContainer}>
@@ -123,7 +124,7 @@ const PainelCGIU = () => {
               </div>
               
               <a href={mapLink} target="_blank" rel="noopener noreferrer" style={styles.footerLink}>
-                ver localização no mapa
+                ver localização no mapa ↗
               </a>
             </div>
           );
@@ -139,27 +140,31 @@ const styles = {
   headerTitle: { fontSize: '22px', fontWeight: '600', margin: 0, color: '#fff', letterSpacing: '-0.5px' },
   headerSubtitle: { fontSize: '13px', color: '#8b949e', margin: '4px 0 0 0' },
   
-  legendContainer: { display: 'flex', alignItems: 'center', gap: '20px', backgroundColor: '#161b22', padding: '10px 20px', borderRadius: '12px', border: '1px solid #30363d' },
+  legendContainer: { display: 'flex', alignItems: 'center', gap: '20px', backgroundColor: '#161b22', padding: '10px 20px', borderRadius: '12px', border: '1px solid #30363d', flexWrap: 'wrap' },
   legendItem: { display: 'flex', alignItems: 'center', gap: '8px' },
   legendDot: { width: '8px', height: '8px', borderRadius: '50%' },
   legendText: { fontSize: '11px', fontWeight: '600', color: '#8b949e', textTransform: 'uppercase' },
   
   liveContainer: { display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px', paddingLeft: '20px', borderLeft: '1px solid #30363d' },
-  pulseIndicator: { width: '8px', height: '8px', backgroundColor: '#00D2FF', borderRadius: '50%', boxShadow: '0 0 8px #52c41a', animation: 'pulse 2s infinite' },
-  liveText: { fontSize: '11px', fontWeight: '800', color: '#00D2FF', letterSpacing: '0.5px', textTransform: 'uppercase' },
+  pulseIndicator: { width: '8px', height: '8px', backgroundColor: '#00D2FF', borderRadius: '50%', boxShadow: '0 0 8px #00D2FF', animation: 'pulse 2s infinite' },
+  liveText: { fontSize: '11px', fontWeight: '800', color: '#8b949e', letterSpacing: '0.5px', textTransform: 'uppercase' }, // Cor ajustada para cinza
   
-  grid: { maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' },
+  grid: { maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' },
   card: { backgroundColor: '#161b22', borderRadius: '16px', padding: '28px', border: '1px solid #30363d', display: 'flex', flexDirection: 'column', position: 'relative' },
   cardHeader: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' },
   parkName: { fontSize: '14px', fontWeight: '600', color: '#8b949e', textTransform: 'uppercase', margin: 0, letterSpacing: '0.8px', flex: 1 },
   cardBody: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' },
   bigNumber: { fontSize: '64px', fontWeight: '700', margin: 0, lineHeight: '1' },
-  label: { fontSize: '10px', fontWeight: '800', color: '#484f58', marginTop: '8px', letterSpacing: '1px' },
+  
+  label: { fontSize: '10px', fontWeight: '800', color: '#6e7681', marginTop: '8px', letterSpacing: '1px' }, // Contraste ajustado
+  
   secondaryInfo: { display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'right' },
   infoBlock: { display: 'flex', flexDirection: 'column' },
   infoValue: { fontSize: '20px', fontWeight: '600', color: '#fff' },
-  infoLabel: { fontSize: '9px', fontWeight: '800', color: '#484f58', letterSpacing: '0.5px' },
-  progressBarBg: { width: '100%', height: '5px', backgroundColor: '#0d1117', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' },
+  
+  infoLabel: { fontSize: '9px', fontWeight: '800', color: '#6e7681', letterSpacing: '0.5px' }, // Contraste ajustado
+  
+  progressBarBg: { width: '100%', height: '5px', backgroundColor: '#21262d', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }, // Fundo mais visível
   progressBarFill: { height: '100%', transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)' },
   
   footerLink: { 
@@ -190,9 +195,9 @@ const injectGlobalStyles = () => {
     styleSheet.innerText = `
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       @keyframes pulse { 
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(82, 196, 26, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(82, 196, 26, 0); }
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 210, 255, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
       }
       a:hover { opacity: 0.8 !important; }
     `;
